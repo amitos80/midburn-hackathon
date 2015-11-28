@@ -7,7 +7,7 @@ import ReactDOM from "react-dom/server";
 import {RoutingContext, match} from "react-router";
 import {createLocation} from "history";
 import Transmit from "react-transmit";
-
+import socketio from 'socket.io';
 import routes from "views/routes";
 
 const app      = koa();
@@ -46,6 +46,9 @@ app.use(function *(next) {
 							<meta charset="utf-8">
 							<title>react-isomorphic-starterkit</title>
 							<link rel="shortcut icon" href="/favicon.ico">
+							<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js"></script>
+							<script type="text/javascript" src="/libs/jquery.event.drag-2.0.js"></script>
+							<script src="https://cdn.socket.io/socket.io-1.3.7.js"></script>
 						</head>
 						<body>
 							<div id="react-root">${reactString}</div>
@@ -66,4 +69,15 @@ app.use(function *(next) {
 app.listen(port, () => {
 	console.info("==> ✅  Server is listening");
 	console.info("==> 🌎  Go to http://%s:%s", hostname, port);
+});
+
+let io = socketio.listen(4000);
+io.sockets.on('connection', (socket) => {
+	socket.on('drawClick', (data) => {
+		socket.broadcast.emit('draw', {
+			x: data.x,
+			y: data.y,
+			type: data.type
+		});
+	});
 });
